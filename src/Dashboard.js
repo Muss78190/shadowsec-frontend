@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const BASE_URL = "https://shadowsec-ai.onrender.com"
+const BASE_URL = "https://shadowsec-ai.onrender.com";
 
 function Dashboard({ onLogout }) {
   const [targetUrl, setTargetUrl] = useState("");
   const [reports, setReports] = useState([]);
   const [summaries, setSummaries] = useState([]);
-  const [history, setHistory] = useState([]);
 
   const launchScan = async () => {
     try {
-      await axios.post(`${API_URL}/scan`, { url: targetUrl });
+      await axios.post(`${BASE_URL}/scan`, { url: targetUrl });
       alert("✅ Scan lancé avec succès !");
       fetchAllData();
     } catch (error) {
@@ -23,8 +22,8 @@ function Dashboard({ onLogout }) {
   const fetchAllData = async () => {
     try {
       const [reportsRes, summariesRes] = await Promise.all([
-        axios.get(`${API_URL}/reports`),
-        axios.get(`${API_URL}/summaries`)
+        axios.get(`${BASE_URL}/reports`),
+        axios.get(`${BASE_URL}/summaries`)
       ]);
       setReports(reportsRes.data);
       setSummaries(summariesRes.data);
@@ -82,7 +81,7 @@ function Dashboard({ onLogout }) {
       <ul>
         {reports.map((r) => (
           <li key={r.filename}>
-            <a href={`${API_URL}/reports/${r.filename}`} target="_blank" rel="noopener noreferrer" style={{ color: "#00e0ff" }}>
+            <a href={`${BASE_URL}/reports/${r.filename}`} target="_blank" rel="noopener noreferrer" style={{ color: "#00e0ff" }}>
               {r.filename}
             </a>
           </li>
