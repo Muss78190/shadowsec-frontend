@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "https://shadowsec-ai.onrender.com"; // Corrigé ici
+// ✅ Variable centralisée pour l'API backend
+const API_URL = "https://shadowsec-ai.onrender.com";
 
 function Dashboard({ onLogout }) {
   const [targetUrl, setTargetUrl] = useState("");
@@ -10,7 +11,7 @@ function Dashboard({ onLogout }) {
 
   const launchScan = async () => {
     try {
-      await axios.post(`${API_URL}/scan`, { url: targetUrl }); // Le JSON envoyé est correct maintenant
+      await axios.post(`${API_URL}/scan`, { url: targetUrl });
       alert("✅ Scan lancé avec succès !");
       fetchAllData();
     } catch (error) {
