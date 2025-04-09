@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-// ✅ Variable centralisée pour l'API backend
 const API_URL = "https://shadowsec-ai.onrender.com";
 
 function Dashboard({ onLogout }) {
   const [targetUrl, setTargetUrl] = useState("");
   const [reports, setReports] = useState([]);
   const [summaries, setSummaries] = useState([]);
+  const [recommendationsMap, setRecommendationsMap] = useState({});
 
   const launchScan = async () => {
     try {
@@ -30,6 +30,18 @@ function Dashboard({ onLogout }) {
       setSummaries(summariesRes.data);
     } catch (error) {
       console.error("Erreur lors du chargement des données :", error);
+    }
+  };
+
+  const fetchRecommendations = async (filename) => {
+    try {
+      const res = await axios.get(`${API_URL}/recommendations/${filename}`);
+      setRecommendationsMap((prev) => ({
+        ...prev,
+        [filename]: res.data.recommandations,
+      }));
+    } catch (error) {
+      console.error("Erreur lors de la récupération des recommandations :", error);
     }
   };
 
@@ -99,6 +111,29 @@ function Dashboard({ onLogout }) {
               <li key={idx}>{item}</li>
             ))}
           </ul>
+
+          <button
+            onClick={() => fetchRecommendations(summary.filename)}
+            style={{
+              marginTop: 10,
+              backgroundColor: "#00FFC6",
+              border: "none",
+              padding: "0.5rem",
+              cursor: "pointer",
+              borderRadius: 4,
+              fontWeight: "bold"
+            }}
+          >
+            Voir les recommandations IA
+          </button>
+
+          {recommendationsMap[summary.filename] && (
+            <ul style={{ marginTop: 10, backgroundColor: "#222", padding: 10, borderRadius: 6 }}>
+              {recommendationsMap[summary.filename].map((rec, i) => (
+                <li key={i} style={{ color: "#0ff" }}>{rec}</li>
+              ))}
+            </ul>
+          )}
         </div>
       ))}
     </div>
