@@ -7,7 +7,7 @@ function Dashboard({ onLogout }) {
   const [targetUrl, setTargetUrl] = useState("");
   const [reports, setReports] = useState([]);
   const [summaries, setSummaries] = useState([]);
-  const [recommendationsMap, setRecommendationsMap] = useState({});
+  const [recoPopup, setRecoPopup] = useState(null);
 
   const launchScan = async () => {
     try {
@@ -33,22 +33,6 @@ function Dashboard({ onLogout }) {
     }
   };
 
-  const fetchRecommendations = async (filename) => {
-    try {
-      const res = await axios.get(`${API_URL}/recommendations/${filename}`);
-      setRecommendationsMap((prev) => ({
-        ...prev,
-        [filename]: res.data.recommandations,
-      }));
-    } catch (error) {
-      console.error("Erreur lors de la récupération des recommandations :", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllData();
-  }, []);
-
   const getSeverityLabel = (summary) => {
     const sqli = summary.some((s) => s.includes("SQLi"));
     const xss = summary.some((s) => s.includes("XSS"));
@@ -59,6 +43,23 @@ function Dashboard({ onLogout }) {
     if (ports) return <span style={{ color: "#d1a000" }}>Modérée</span>;
     return <span style={{ color: "lightgreen" }}>Faible</span>;
   };
+
+  const fetchRecommendations = async (filename) => {
+    try {
+      const res = await axios.get(`${API_URL}/recommendations/${filename}`);
+      setRecoPopup(res.data);
+    } catch (error) {
+      alert("❌ Impossible de récupérer les recommandations.");
+    }
+  };
+
+  const closePopup = () => {
+    setRecoPopup(null);
+  };
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
 
   return (
     <div style={{ padding: 30, fontFamily: "Segoe UI, sans-serif", backgroundColor: "#111", color: "#fff", minHeight: "100vh" }}>
@@ -93,10 +94,16 @@ function Dashboard({ onLogout }) {
       <h2 style={{ color: "#fff" }}>Rapports générés</h2>
       <ul>
         {reports.map((r) => (
-          <li key={r.filename}>
-            <a href={`${API_URL}/reports/${r.filename}`} target="_blank" rel="noopener noreferrer" style={{ color: "#00e0ff" }}>
+          <li key={r.filename} style={{ marginBottom: 10 }}>
+            <a href={`${API_URL}/reports/${r.filename}`} target="_blank" rel="noopener noreferrer" style={{ color: "#00e0ff", marginRight: 15 }}>
               {r.filename}
             </a>
+            <button
+              onClick={() => fetchRecommendations(r.filename)}
+              style={{ padding: "0.3rem 0.6rem", fontSize: "0.9rem", backgroundColor: "#00FFC6", border: "none", borderRadius: 4, cursor: "pointer", color: "#000", fontWeight: "bold" }}
+            >
+              Recommandations IA
+            </button>
           </li>
         ))}
       </ul>
@@ -111,31 +118,34 @@ function Dashboard({ onLogout }) {
               <li key={idx}>{item}</li>
             ))}
           </ul>
-
-          <button
-            onClick={() => fetchRecommendations(summary.filename)}
-            style={{
-              marginTop: 10,
-              backgroundColor: "#00FFC6",
-              border: "none",
-              padding: "0.5rem",
-              cursor: "pointer",
-              borderRadius: 4,
-              fontWeight: "bold"
-            }}
-          >
-            Voir les recommandations IA
-          </button>
-
-          {recommendationsMap[summary.filename] && (
-            <ul style={{ marginTop: 10, backgroundColor: "#222", padding: 10, borderRadius: 6 }}>
-              {recommendationsMap[summary.filename].map((rec, i) => (
-                <li key={i} style={{ color: "#0ff" }}>{rec}</li>
-              ))}
-            </ul>
-          )}
         </div>
       ))}
+
+      {/* Popup Recommandations */}
+      {recoPopup && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0,
+          width: "100%", height: "100%",
+          backgroundColor: "rgba(0,0,0,0.85)",
+          color: "#fff", padding: "30px",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          zIndex: 9999
+        }}>
+          <div style={{ maxWidth: "800px", maxHeight: "80vh", overflowY: "auto", background: "#222", padding: 30, borderRadius: 10 }}>
+            <h2 style={{ color: "#00FFC6" }}>🔧 Recommandations IA pour {recoPopup.filename}</h2>
+            <ul>
+              {recoPopup.recommandations.map((rec, idx) => (
+                <li key={idx} style={{ marginBottom: 10 }}>{rec}</li>
+              ))}
+            </ul>
+            <button onClick={closePopup} style={{ marginTop: 20, padding: "0.5rem 1rem", backgroundColor: "#e74c3c", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer" }}>
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
