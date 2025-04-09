@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import "./Dashboard.css";
 
 const API_URL = "https://shadowsec-ai.onrender.com";
 
@@ -50,10 +51,10 @@ function Dashboard({ onLogout }) {
     const xss = summary.some((s) => s.includes("XSS"));
     const ports = summary.some((s) => s.includes("Ports"));
 
-    if (sqli && xss) return <span style={{ color: "red" }}>Critique</span>;
-    if (sqli || xss) return <span style={{ color: "orange" }}>Élevée</span>;
-    if (ports) return <span style={{ color: "#d1a000" }}>Modérée</span>;
-    return <span style={{ color: "lightgreen" }}>Faible</span>;
+    if (sqli && xss) return <span className="label critical">🟥 Critique</span>;
+    if (sqli || xss) return <span className="label high">🟧 Élevée</span>;
+    if (ports) return <span className="label medium">🟨 Modérée</span>;
+    return <span className="label low">🟩 Faible</span>;
   };
 
   useEffect(() => {
@@ -61,81 +62,55 @@ function Dashboard({ onLogout }) {
   }, []);
 
   return (
-    <div style={{ padding: 30, fontFamily: "Segoe UI, sans-serif", backgroundColor: "#0b0c10", color: "#fff", minHeight: "100vh" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ color: "#00FFC6" }}>ShadowSec AI Dashboard</h1>
-        <button
-          onClick={onLogout}
-          style={{ backgroundColor: "#e74c3c", color: "#fff", border: "none", padding: "0.5rem 1rem", borderRadius: 4, cursor: "pointer" }}
-        >
-          Se déconnecter
-        </button>
-      </div>
+    <div className="dashboard-container">
+      <header className="dashboard-header">
+        <h1>⚡ ShadowSec AI</h1>
+        <button className="logout-button" onClick={onLogout}>Déconnexion</button>
+      </header>
 
-      <div style={{ marginTop: 30 }}>
+      <div className="scan-section">
         <input
           type="text"
           placeholder="http://example.com"
           value={targetUrl}
           onChange={(e) => setTargetUrl(e.target.value)}
-          style={{ padding: "0.6rem", width: "350px", marginRight: "10px", background: "#1f1f1f", color: "#fff", border: "1px solid #555" }}
         />
-        <button
-          onClick={launchScan}
-          style={{ padding: "0.6rem 1rem", background: "#00FFC6", border: "none", color: "#000", fontWeight: "bold", borderRadius: 5 }}
-        >
-          Lancer un Scan
-        </button>
+        <button className="scan-button" onClick={launchScan}>🚀 Lancer un Scan</button>
       </div>
 
-      <hr style={{ margin: "30px 0", borderColor: "#333" }} />
+      <section>
+        <h2>📁 Rapports</h2>
+        <ul>
+          {reports.map((r) => (
+            <li key={r.filename}>
+              <a href={`${API_URL}/reports/${r.filename}`} target="_blank" rel="noreferrer">
+                📄 {r.filename}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      <h2 style={{ color: "#fff" }}>📄 Rapports générés</h2>
-      <ul>
-        {reports.map((r) => (
-          <li key={r.filename}>
-            <a href={`${API_URL}/reports/${r.filename}`} target="_blank" rel="noopener noreferrer" style={{ color: "#00e0ff" }}>
-              {r.filename}
-            </a>
-          </li>
+      <section>
+        <h2>📊 Résumés</h2>
+        {summaries.map((summary) => (
+          <div className="summary-card" key={summary.filename}>
+            <strong>{summary.filename}</strong>
+            <div>{getSeverityLabel(summary.summary)}</div>
+            <ul>
+              {summary.summary.map((item, idx) => (
+                <li key={idx}>{item}</li>
+              ))}
+            </ul>
+            <button className="reco-button" onClick={() => getRecommendations(summary.filename)}>
+              🤖 Voir recommandations IA
+            </button>
+            {recommendations[summary.filename] && (
+              <pre className="reco-box">{recommendations[summary.filename]}</pre>
+            )}
+          </div>
         ))}
-      </ul>
-
-      <h2 style={{ marginTop: 30, color: "#fff" }}>📊 Résumés des rapports</h2>
-      {summaries.map((summary) => (
-        <div key={summary.filename} style={{ marginBottom: 30, padding: 20, background: "#161b22", borderRadius: 8 }}>
-          <strong style={{ fontSize: "1.1rem" }}>{summary.filename}</strong>
-          <div style={{ marginTop: 5, fontWeight: "bold" }}>{getSeverityLabel(summary.summary)}</div>
-          <ul>
-            {summary.summary.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
-          <button
-            onClick={() => getRecommendations(summary.filename)}
-            style={{
-              marginTop: 10,
-              backgroundColor: "#007BFF",
-              color: "#fff",
-              padding: "0.4rem 1rem",
-              border: "none",
-              borderRadius: 5,
-              cursor: "pointer"
-            }}
-          >
-            Voir recommandations IA
-          </button>
-
-          {recommendations[summary.filename] && (
-            <div style={{ marginTop: 15 }}>
-              <h4>💡 Recommandations IA :</h4>
-              <pre style={{ background: "#0f1115", padding: 10, borderRadius: 6, whiteSpace: "pre-wrap" }}>
-                {recommendations[summary.filename]}
-              </pre>
-            </div>
-          )}
-        </div>
-      ))}
+      </section>
     </div>
   );
 }

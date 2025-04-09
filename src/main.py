@@ -1,3 +1,4 @@
+from ai_assistant import generate_recommendations
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -198,4 +199,18 @@ def parse_report_summary(filename):
     return {
         "filename": filename,
         "summary": summary if summary else ["✅ Aucun danger critique détecté"]
+    }
+@app.get("/recommendations/{filename}")
+def get_ai_recommendations(filename: str):
+    filepath = os.path.join(REPORTS_DIR, filename)
+    if not os.path.exists(filepath):
+        return {"error": "Fichier introuvable."}
+
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    recommandations = generate_recommendations(content)
+    return {
+        "filename": filename,
+        "recommandations": recommandations
     }
