@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Dashboard.css";
+import { FaSignOutAlt, FaFolderOpen, FaChartLine, FaFileAlt, FaRocket, FaExclamationCircle, FaExclamationTriangle, FaServer } from "react-icons/fa";
+import './Dashboard.css';
 
 const API_URL = "https://shadowsec-ai.onrender.com";
 
@@ -46,15 +48,15 @@ function Dashboard({ onLogout }) {
     }
   };
 
-  const getSeverityLabel = (summary) => {
+  const getSeverityTag = (summary) => {
     const sqli = summary.some((s) => s.includes("SQLi"));
     const xss = summary.some((s) => s.includes("XSS"));
     const ports = summary.some((s) => s.includes("Ports"));
 
-    if (sqli && xss) return <span className="label critical">🟥 Critique</span>;
-    if (sqli || xss) return <span className="label high">🟧 Élevée</span>;
-    if (ports) return <span className="label medium">🟨 Modérée</span>;
-    return <span className="label low">🟩 Faible</span>;
+    if (sqli && xss) return <span className="tag danger">Critique</span>;
+    if (sqli || xss) return <span className="tag warning">Élevée</span>;
+    if (ports) return <span className="tag moderate">Modérée</span>;
+    return <span className="tag safe">Faible</span>;
   };
 
   useEffect(() => {
@@ -62,55 +64,70 @@ function Dashboard({ onLogout }) {
   }, []);
 
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <h1>⚡ ShadowSec AI</h1>
-        <button className="logout-button" onClick={onLogout}>Déconnexion</button>
-      </header>
+    <div className="dashboard">
+      <div className="header">
+        <div className="logo">🛡️ <span>ShadowSec</span></div>
+        <button className="logout" onClick={onLogout}><FaSignOutAlt /> Se déconnecter</button>
+      </div>
+
+      <h1 className="title">ShadowSec AI Dashboard</h1>
+      <p className="subtitle">L’IA éthique au service de votre cybersécurité</p>
 
       <div className="scan-section">
         <input
           type="text"
-          placeholder="http://example.com"
+          placeholder="https://example.com"
           value={targetUrl}
           onChange={(e) => setTargetUrl(e.target.value)}
         />
-        <button className="scan-button" onClick={launchScan}>🚀 Lancer un Scan</button>
+        <button onClick={launchScan}><FaRocket /> Lancer un Scan</button>
       </div>
 
-      <section>
-        <h2>📁 Rapports</h2>
-        <ul>
+      <div className="section">
+        <h2><FaFolderOpen /> Rapports générés</h2>
+        <div className="report-list">
           {reports.map((r) => (
-            <li key={r.filename}>
-              <a href={`${API_URL}/reports/${r.filename}`} target="_blank" rel="noreferrer">
-                📄 {r.filename}
-              </a>
-            </li>
+            <div key={r.filename} className="report-file">
+              <FaFileAlt />
+              <a href={`${API_URL}/reports/${r.filename}`} target="_blank" rel="noreferrer">{r.filename}</a>
+            </div>
           ))}
-        </ul>
-      </section>
+        </div>
+      </div>
 
-      <section>
-        <h2>📊 Résumés</h2>
+      <div className="section">
+        <h2><FaChartLine /> Résumés des rapports</h2>
         {summaries.map((summary) => (
-          <div className="summary-card" key={summary.filename}>
-            <strong>{summary.filename}</strong>
-            <div>{getSeverityLabel(summary.summary)}</div>
+          <div key={summary.filename} className="summary-card">
+            <h4>{summary.filename}</h4>
+            {getSeverityTag(summary.summary)}
             <ul>
               {summary.summary.map((item, idx) => (
-                <li key={idx}>{item}</li>
+                <li key={idx}>
+                  {item.includes("SQLi") && <FaExclamationCircle color="red" />}
+                  {item.includes("XSS") && <FaExclamationTriangle color="#e6b800" />}
+                  {item.includes("Ports") && <FaServer color="#007bff" />}
+                  {" "}{item}
+                </li>
               ))}
             </ul>
-            <button className="reco-button" onClick={() => getRecommendations(summary.filename)}>
-              🤖 Voir recommandations IA
+            <button onClick={() => getRecommendations(summary.filename)} className="recommendation-btn">
+              Voir recommandations IA
             </button>
+
             {recommendations[summary.filename] && (
-              <pre className="reco-box">{recommendations[summary.filename]}</pre>
+              <div className="recommendation-box">
+                <h5>💡 Recommandations IA :</h5>
+                <pre>{recommendations[summary.filename]}</pre>
+              </div>
             )}
           </div>
         ))}
-      </section>
+      </div>
+
+      <footer>
+        <p>© 2025 ShadowSec. <a href="#">CGU</a> · <a href="#">Mentions légales</a> · <a href="#">Contact</a></p>
+      </footer>
     </div>
   );
 }
