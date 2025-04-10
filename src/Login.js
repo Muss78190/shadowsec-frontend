@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./Login.css";
 
-const API_URL = "https://shadowsec-ai.onrender.com";
+const API_URL = "https://shadowsec-backend.onrender.com";
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -20,7 +20,7 @@ function Login({ onLogin }) {
 
       const token = res.data.access_token;
       localStorage.setItem("token", token);
-      onLogin(); // redirige vers le dashboard
+      onLogin(token);
     } catch (err) {
       alert("❌ Identifiants incorrects !");
     }
