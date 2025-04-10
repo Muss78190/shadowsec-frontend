@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./Login.css";
 
-const API_URL = "http://127.0.0.1:8000"; // ou ton backend Render
+const API_URL = "https://shadowsec-ai.onrender.com";
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
