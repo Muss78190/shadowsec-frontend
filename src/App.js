@@ -1,18 +1,11 @@
-import React, { useState } from "react";
-import Login from "./Login";
-import Dashboard from "./Dashboard";
+import React from "react";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
   return (
-    <>
-      {isAuthenticated ? (
-        <Dashboard onLogout={() => setIsAuthenticated(false)} />
-      ) : (
-        <Login onLogin={setIsAuthenticated} />
-      )}
-    </>
+    <div className="App">
+      <LandingPage />
+    </div>
   );
 }
 

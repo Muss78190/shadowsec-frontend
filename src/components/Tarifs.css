@@ -1,0 +1,23 @@
+.tarifs {
+    background: #fff;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  
+  .tarifs h2 {
+    color: #1e3a8a;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .tarifs .price-box {
+    display: inline-block;
+    padding: 2rem;
+    border: 2px solid #2563eb;
+    border-radius: 10px;
+    background: #f0f4ff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1e40af;
+  }
+  
