@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Dashboard.css";
-import { FaSignOutAlt, FaFolderOpen, FaChartLine, FaFileAlt, FaRocket, FaExclamationCircle, FaExclamationTriangle, FaServer } from "react-icons/fa";
-import './Dashboard.css';
+import {
+  FaSignOutAlt, FaFolderOpen, FaChartLine,
+  FaFileAlt, FaRocket, FaExclamationCircle,
+  FaExclamationTriangle, FaServer
+} from "react-icons/fa";
 
 const API_URL = "https://shadowsec-ai.onrender.com";
 
-function Dashboard({ onLogout }) {
+function Dashboard({ onLogout, token }) {
   const [targetUrl, setTargetUrl] = useState("");
   const [reports, setReports] = useState([]);
   const [summaries, setSummaries] = useState([]);
   const [recommendations, setRecommendations] = useState({});
 
+  const axiosAuth = axios.create({
+    baseURL: API_URL,
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
   const launchScan = async () => {
     try {
-      await axios.post(`${API_URL}/scan`, { url: targetUrl });
+      await axiosAuth.post(`/scan`, { url: targetUrl });
       alert("✅ Scan lancé avec succès !");
       fetchAllData();
     } catch (error) {
@@ -26,8 +36,8 @@ function Dashboard({ onLogout }) {
   const fetchAllData = async () => {
     try {
       const [reportsRes, summariesRes] = await Promise.all([
-        axios.get(`${API_URL}/reports`),
-        axios.get(`${API_URL}/summaries`)
+        axiosAuth.get(`/reports`),
+        axiosAuth.get(`/summaries`)
       ]);
       setReports(reportsRes.data);
       setSummaries(summariesRes.data);
@@ -38,7 +48,7 @@ function Dashboard({ onLogout }) {
 
   const getRecommendations = async (filename) => {
     try {
-      const res = await axios.get(`${API_URL}/recommendations/${filename}`);
+      const res = await axiosAuth.get(`/recommendations/${filename}`);
       setRecommendations((prev) => ({
         ...prev,
         [filename]: res.data.recommandations
